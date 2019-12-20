@@ -7,6 +7,8 @@ classes = ["aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat"
 
 
 def convert_annotation(year, image_id, list_file):
+    """
+    """
     in_file = open('VOCdevkit/VOC%s/Annotations/%s.xml'%(year, image_id))
     tree=ET.parse(in_file)
     root = tree.getroot()
@@ -20,6 +22,9 @@ def convert_annotation(year, image_id, list_file):
         xmlbox = obj.find('bndbox')
         b = (int(xmlbox.find('xmin').text), int(xmlbox.find('ymin').text), int(xmlbox.find('xmax').text), int(xmlbox.find('ymax').text))
         list_file.write(" " + ",".join([str(a) for a in b]) + ',' + str(cls_id))
+
+    in_file.close()
+
 
 wd = getcwd()
 
