@@ -106,3 +106,10 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+
+.vscode/
+weights/
+pretrained_models/
+
+*.ipynb
