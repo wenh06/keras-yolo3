@@ -10,6 +10,8 @@ from typing import Optional, NoReturn
 
 __all__ = [
     'xml_to_csv',
+    'voc_to_yolo',
+    'voc_to_yolo_in_batch',
 ]
 
 
