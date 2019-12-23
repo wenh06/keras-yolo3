@@ -15,7 +15,7 @@ __all__ = [
 ]
 
 
-_ALL_LESION_TYPES = ['fore', 'cold_sore',]
+_ALL_LESION_TYPES = ['fore', 'cold_sore', 'pustules',]
 _VALID_LEISION_TYPES = ['fore',]
 
 
@@ -55,7 +55,7 @@ def xml_to_csv(xml_dir:str, save_csv_path:Optional[str]=None) -> pd.DataFrame:
     return xml_df
 
 
-def voc_to_yolo(voc_ann_path:str, yolo_save_dir:str) -> NoReturn:
+def voc_to_yolo(voc_ann_path:str, yolo_save_dir:str, **kwargs) -> NoReturn:
     """
     yolo annotation format:
         <object-class> <x_center> <y_center> <width> <height>
@@ -63,6 +63,8 @@ def voc_to_yolo(voc_ann_path:str, yolo_save_dir:str) -> NoReturn:
         [1] https://github.com/AlexeyAB/darknet#how-to-train-to-detect-your-custom-objects
         [2] https://github.com/tzutalin/labelImg/blob/master/libs/yolo_io.py
     """
+    convert_only_valid = kwargs('convert_only_valid', True)
+
     voc_filename = os.path.basename(voc_ann_path)
     tree = ET.parse(voc_filename)
     root = tree.getroot()
@@ -76,7 +78,10 @@ def voc_to_yolo(voc_ann_path:str, yolo_save_dir:str) -> NoReturn:
         img_width = int(root.find('size').find('width').text)
         img_height = int(root.find('size').find('height').text)
         for member in root.findall('object'):
-            class_idx = _ALL_LESION_TYPES.index(member.find('name').text)
+            class_name = member.find('name').text
+            if convert_only_valid and class_name not in _VALID_LEISION_TYPES:
+                continue
+            class_idx = _ALL_LESION_TYPES.index()
             difficult = member.find('difficult').text if member.find('difficult') is not None else ''
             xmin = int(member.find('bndbox').find('xmin').text)
             ymin = int(member.find('bndbox').find('ymin').text)
@@ -89,11 +94,12 @@ def voc_to_yolo(voc_ann_path:str, yolo_save_dir:str) -> NoReturn:
             yf.write("%d %.6f %.6f %.6f %.6f\n" % (class_idx, xcen, ycen, w, h))
 
 
-def voc_to_yolo_in_batch(voc_dir:str, yolo_save_dir:str) -> NoReturn:
+def voc_to_yolo_in_batch(voc_dir:str, yolo_save_dir:str, **kwargs) -> NoReturn:
     """
     """
+    os.makedirs(yolo_save_dir, exist_ok=True)
     for xml_file in glob.glob(os.path.join(voc_dir, '*.xml')):
-        voc_to_yolo(xml_file, yolo_save_dir)
+        voc_to_yolo(xml_file, yolo_save_dir, **kwargs)
 
 
 def yolo_to_csv(yolo_dir:str, save_csv_path:Optional[str]=None) -> pd.DataFrame:
